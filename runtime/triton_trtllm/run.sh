@@ -64,6 +64,7 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
     cosyvoice2_instruct2_dir="cosyvoice2_instruct2"
 
     cp -r ./model_repo/${cosyvoice2_dir} $model_repo
+    cp -r ./model_repo/${cosyvoice2_instruct2_dir} $model_repo
     cp -r ./model_repo/tensorrt_llm $model_repo
     cp -r ./model_repo/token2wav $model_repo
     if [ $use_spk2info_cache == "False" ]; then
