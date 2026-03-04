@@ -19,7 +19,7 @@ use_spk2info_cache=False
 
 if [ $stage -le -1 ] && [ $stop_stage -ge -1 ]; then
     echo "Cloning CosyVoice"
-    git clone --recursive https://github.com/FunAudioLLM/CosyVoice.git $cosyvoice_path
+    git clone --recursive https://github.com/david8862/CosyVoice.git $cosyvoice_path
     cd $cosyvoice_path
     git submodule update --init --recursive
     cd runtime/triton_trtllm
@@ -60,6 +60,7 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
     rm -rf $model_repo
     mkdir -p $model_repo
     cosyvoice2_dir="cosyvoice2"
+    cosyvoice2_instruct2_dir="cosyvoice2_instruct2"
 
     cp -r ./model_repo/${cosyvoice2_dir} $model_repo
     cp -r ./model_repo/tensorrt_llm $model_repo
@@ -79,6 +80,7 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
 
     python3 scripts/fill_template.py -i ${model_repo}/token2wav/config.pbtxt model_dir:${MODEL_DIR},triton_max_batch_size:${TRITON_MAX_BATCH_SIZE},max_queue_delay_microseconds:${MAX_QUEUE_DELAY_MICROSECONDS}
     python3 scripts/fill_template.py -i ${model_repo}/${cosyvoice2_dir}/config.pbtxt model_dir:${MODEL_DIR},bls_instance_num:${BLS_INSTANCE_NUM},llm_tokenizer_dir:${LLM_TOKENIZER_DIR},triton_max_batch_size:${TRITON_MAX_BATCH_SIZE},decoupled_mode:${DECOUPLED_MODE},max_queue_delay_microseconds:${MAX_QUEUE_DELAY_MICROSECONDS}
+    python3 scripts/fill_template.py -i ${model_repo}/${cosyvoice2_instruct2_dir}/config.pbtxt model_dir:${MODEL_DIR},bls_instance_num:${BLS_INSTANCE_NUM},llm_tokenizer_dir:${LLM_TOKENIZER_DIR},triton_max_batch_size:${TRITON_MAX_BATCH_SIZE},decoupled_mode:${DECOUPLED_MODE},max_queue_delay_microseconds:${MAX_QUEUE_DELAY_MICROSECONDS}
     python3 scripts/fill_template.py -i ${model_repo}/tensorrt_llm/config.pbtxt triton_backend:tensorrtllm,triton_max_batch_size:${TRITON_MAX_BATCH_SIZE},decoupled_mode:${DECOUPLED_MODE},max_beam_width:1,engine_dir:${ENGINE_PATH},max_tokens_in_paged_kv_cache:2560,max_attention_window_size:2560,kv_cache_free_gpu_mem_fraction:0.5,exclude_input_in_output:True,enable_kv_cache_reuse:False,batching_strategy:inflight_fused_batching,max_queue_delay_microseconds:${MAX_QUEUE_DELAY_MICROSECONDS},encoder_input_features_data_type:TYPE_FP16,logits_datatype:TYPE_FP32
     if [ $use_spk2info_cache == "False" ]; then
         python3 scripts/fill_template.py -i ${model_repo}/audio_tokenizer/config.pbtxt model_dir:${MODEL_DIR},triton_max_batch_size:${TRITON_MAX_BATCH_SIZE},max_queue_delay_microseconds:${MAX_QUEUE_DELAY_MICROSECONDS}

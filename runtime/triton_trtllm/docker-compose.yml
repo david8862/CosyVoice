@@ -1,3 +1,20 @@
+# NOTE: host server to run this docker container must have Nvidia driver which support CUDA
+# version >= 12.9, like:
+#
+# $ nvidia-smi
+# +-----------------------------------------------------------------------------------------+
+# | NVIDIA-SMI 580.126.09             Driver Version: 580.126.09     CUDA Version: 13.0     |
+# +-----------------------------------------+------------------------+----------------------+
+# | GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+# | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+# |                                         |                        |               MIG M. |
+# |=========================================+========================+======================|
+# |   0  NVIDIA GeForce RTX 4070 Ti     Off |   00000000:04:00.0  On |                  N/A |
+# |  0%   36C    P8              7W /  285W |    6401MiB /  12282MiB |      0%      Default |
+# |                                         |                        |                  N/A |
+# +-----------------------------------------+------------------------+----------------------+
+# ...
+#
 services:
   tts:
     image: soar97/triton-cosyvoice:25.06
@@ -17,4 +34,4 @@ services:
               device_ids: ['0']
               capabilities: [gpu]
     command: >
-      /bin/bash -c "pip install modelscope && cd /workspace && git clone https://github.com/FunAudioLLM/CosyVoice.git && cd CosyVoice && git submodule update --init --recursive && cd runtime/triton_trtllm && bash run.sh 0 3"
+      /bin/bash -c "pip install modelscope && cd /workspace && git clone https://github.com/david8862/CosyVoice.git && cd CosyVoice && git submodule update --init --recursive && cd runtime/triton_trtllm && bash run.sh 0 3"

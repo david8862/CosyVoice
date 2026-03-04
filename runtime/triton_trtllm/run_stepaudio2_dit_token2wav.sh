@@ -28,7 +28,7 @@ if [ $stage -le -1 ] && [ $stop_stage -ge -1 ]; then
     git clone https://github.com/yuekaizhang/Step-Audio2.git -b trt $stepaudio2_path
 
     echo "Cloning CosyVoice"
-    git clone --recursive https://github.com/FunAudioLLM/CosyVoice.git $cosyvoice_path
+    git clone --recursive https://github.com/david8862/CosyVoice.git $cosyvoice_path
     cd $cosyvoice_path
     git submodule update --init --recursive
     cd runtime/triton_trtllm
