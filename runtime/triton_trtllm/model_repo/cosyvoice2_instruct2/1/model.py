@@ -123,31 +123,58 @@ class TritonPythonModel:
     # ------------------------------------------------------------------
     # BLS helper: forward to audio_tokenizer sub-model
     # ------------------------------------------------------------------
-    def forward_audio_tokenizer(self, wav_tensor: pb_utils.Tensor,
-                                wav_len_tensor: pb_utils.Tensor) -> torch.Tensor:
-        """Extract speech tokens from reference audio (used for flow/vocoder only).
+#    def forward_audio_tokenizer_bk(self, wav_tensor: pb_utils.Tensor,
+#                                wav_len_tensor: pb_utils.Tensor) -> torch.Tensor:
+#        """Extract speech tokens from reference audio (used for flow/vocoder only).
+#
+#        Args:
+#            wav_tensor: pb_utils Tensor of reference_wav  (FP32, [1, N])
+#            wav_len_tensor: pb_utils Tensor of reference_wav_len (INT32, [1,1])
+#
+#        Returns:
+#            prompt_speech_tokens: torch.Tensor  INT32  [T]
+#        """
+#        inference_request = pb_utils.InferenceRequest(
+#            model_name='audio_tokenizer',
+#            requested_output_names=['prompt_speech_tokens'],
+#            inputs=[wav_tensor, wav_len_tensor]
+#        )
+#        inference_response = inference_request.exec()
+#        if inference_response.has_error():
+#            raise pb_utils.TritonModelException(
+#                inference_response.error().message()
+#            )
+#        prompt_speech_tokens = pb_utils.get_output_tensor_by_name(
+#            inference_response, 'prompt_speech_tokens'
+#        )
+#        return from_dlpack(prompt_speech_tokens.to_dlpack()).cpu()
+
+    def forward_audio_tokenizer(self, wav, wav_len):
+        """Forward pass through the audio tokenizer component.
 
         Args:
-            wav_tensor: pb_utils Tensor of reference_wav  (FP32, [1, N])
-            wav_len_tensor: pb_utils Tensor of reference_wav_len (INT32, [1,1])
+            wav: Input waveform tensor
+            wav_len: Waveform length tensor
 
         Returns:
-            prompt_speech_tokens: torch.Tensor  INT32  [T]
+            Tuple of global and semantic tokens
         """
         inference_request = pb_utils.InferenceRequest(
             model_name='audio_tokenizer',
             requested_output_names=['prompt_speech_tokens'],
-            inputs=[wav_tensor, wav_len_tensor]
+            inputs=[wav, wav_len]
         )
+
         inference_response = inference_request.exec()
         if inference_response.has_error():
-            raise pb_utils.TritonModelException(
-                inference_response.error().message()
-            )
-        prompt_speech_tokens = pb_utils.get_output_tensor_by_name(
-            inference_response, 'prompt_speech_tokens'
-        )
-        return from_dlpack(prompt_speech_tokens.to_dlpack()).cpu()
+            raise pb_utils.TritonModelException(inference_response.error().message())
+
+        # Extract and convert output tensors
+        prompt_speech_tokens = pb_utils.get_output_tensor_by_name(inference_response, 'prompt_speech_tokens')
+        prompt_speech_tokens = torch.utils.dlpack.from_dlpack(prompt_speech_tokens.to_dlpack()).cpu()
+
+        return prompt_speech_tokens
+
 
     # ------------------------------------------------------------------
     # BLS helper: forward to speaker_embedding sub-model
